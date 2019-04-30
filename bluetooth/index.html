@@ -1,0 +1,118 @@
+<!DOCTYPE HTML>
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+<title>micro:bit でプログラミング (bluetooth温度計)</title>
+</head>
+
+<body>
+  <div style="text-align: center">
+    <h1>micro:bit と Bluetooth 接続して温度を表示する。</h1>
+    <form>
+      <table border="1" align="center" width="300" height="50">
+        <caption>micro:bitとの接続</caption>
+        <tr>
+          <td>
+            <input type="button" value="接続する" onclick="connect();"/>
+          </td>
+          <td>
+            <input type="button" value="切断する" onclick="disconnect();"/>
+          </td>
+        </tr>
+      </table>
+    </form>
+
+    <table border="1" align="center" width="300" height="50">
+      <caption>温度</caption>
+      <tr>
+        <td>
+          <div><span id="temperature">micro:bitと接続してください。</span></div>
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+<script>
+// UUID
+const TEMPERATURE_SERVICE_UUID = 'e95d6100-251d-470a-a062-fa1922dfa9a8'
+const TEMPERATURE_PERIOD_UUID = 'e95d1b25-251d-470a-a062-fa1922dfa9a8'
+const TEMPERATURE_DATA_UUID = 'e95d9250-251d-470a-a062-fa1922dfa9a8'
+
+const INTERVAL_MSEC = 1000
+
+// 接続
+function connect () {
+  navigator.bluetooth.requestDevice({
+    filters: [{namePrefix: "BBC micro:bit"}],
+    optionalServices: [TEMPERATURE_SERVICE_UUID]
+  })
+
+  // GATT
+    .then(device => {
+      connectDevice = device
+      console.log('device', device)
+      return device.gatt.connect()
+    })
+
+    .then(server => {
+      console.log('server', server)
+      server.getPrimaryService(TEMPERATURE_SERVICE_UUID)
+        .then(service => {
+          service.getCharacteristic(TEMPERATURE_PERIOD_UUID)
+            .then(characteristic => {
+              characteristic.writeValue(new Uint16Array([INTERVAL]))
+            })
+          startEvent(service, TEMPERATURE_DATA_UUID)
+        })
+    })
+    .catch(error => {
+      console.log(error)
+      alert('接続できませんでした。')
+    })
+}
+
+//Event
+function startEvent (service, charUUID) {
+  service.getCharacteristic(charUUID)
+    .then(characteristic => {
+      characteristic.startNotifications()
+        .then(char => {
+          alert('接続しました。')
+          characteristic.addEventListener('characteristicvaluechanged',
+            onTemperatureChanged)
+          console.log('Temperature:', char)
+        })
+    })
+    .catch(error => {
+      console.log(error)
+      alert('接続できませんでした。')
+    })
+}
+
+// 温度表示
+function onTemperatureChanged (event) {
+  let temperature = event.target.value.getUint8(0, true)
+  console.log('温度:' + temperature)
+  document.getElementById("temperature").innerText = temperature + '℃';
+}
+
+// 切断
+function disconnect () {
+  if (!connectDevice || !connectDevice.gatt.connected) {
+    return
+  }
+  connectDevice.gatt.disconnect()
+  alert('切断しました。')
+  postDisconnect()
+}
+
+</script>
+</html>
+
+<!-- 参考にしたサイト様(参照 : 2019.01.19)
+https://www.tkmium.tech/entry/microbit-4
+https://qiita.com/yokmama/items/5522fabfb5b9623278e2
+https://sanuki-tech.net/micro-bit/bluetooth/temperature/
+-->

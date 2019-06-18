@@ -86,10 +86,6 @@ iOS
 # みよう！
 
 ***
-# もっと分解能を高めて
-# みよう！
-
-***
 # LED 1 つでコンパス
 
 ![120%](compass_1x1.png)
@@ -136,3 +132,6 @@ iOS
 
 ***
 このスライドは marp を使って作成しました。
+
+原稿: https://github.com/katoy/sample-microbit/blob/work/compass/slide/README.md
+

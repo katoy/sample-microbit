@@ -109,7 +109,7 @@ iOS
 ***
 # LED 5x5 のコンパス
 
-![120%](compass_5x5.png)
+![100%](compass_5x5.png)
 
 ***
 コード
@@ -126,7 +126,7 @@ iOS
 # Thanks!
 
 # 前回:　Let's Rspec
-# 次回:　Lse's HaloCode
+# 次回:　Let's HaloCode
 # あるいは
 # Let's docker
 
